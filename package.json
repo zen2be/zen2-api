@@ -1,0 +1,42 @@
+{
+  "name": "zen2-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "build": "rimraf build && tsc",
+    "preserve": "npm run build",
+    "serve": "concurrently \"tsc --watch\" \"nodemon -q build/app.js\"",
+    "prestart": "npm run build",
+    "start": "node build/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zen2be/zen2-api.git"
+  },
+  "author": "Tycho Verstraete",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zen2be/zen2-api/issues"
+  },
+  "homepage": "https://github.com/zen2be/zen2-api#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "helmet": "^4.6.0",
+    "morgan": "^1.10.0",
+    "mysql2": "^2.3.2",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.2.38"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/morgan": "^1.9.3",
+    "@types/node": "^16.11.6",
+    "concurrently": "^6.3.0",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.4"
+  }
+}
