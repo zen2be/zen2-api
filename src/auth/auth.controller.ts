@@ -7,11 +7,12 @@ import {
   Get,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/public.decorator';
 import { UsersService } from 'src/users/users.service';
 import { AuthService } from './auth.service';
 
+@ApiTags('authentication')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -27,15 +28,8 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  // @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   getProfile(@Request() req) {
     return this.usersService.findOne(req.user.userId);
-  }
-
-  @Get('logout')
-  logout(@Request() req, @Response() res) {
-    req.logout();
-    return res.status(204);
   }
 }

@@ -6,6 +6,11 @@ import { DatabaseModule } from './database.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { RolesGuard } from './auth/roles.guard';
+import { AppointmentsModule } from './appointments/appointments.module';
+import { TreatmentsModule } from './treatments/treatments.module';
+import { PatientsModule } from './patients/patients.module';
+import { SpecialistsModule } from './specialists/specialists.module';
 
 @Module({
   imports: [
@@ -23,12 +28,20 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
     DatabaseModule,
     UsersModule,
     AuthModule,
+    AppointmentsModule,
+    TreatmentsModule,
+    PatientsModule,
+    SpecialistsModule,
   ],
   controllers: [],
   providers: [
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

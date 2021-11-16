@@ -5,8 +5,9 @@ import {
   IsAlpha,
   IsAscii,
   IsBoolean,
-  IsDate,
+  IsDateString,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
@@ -68,13 +69,14 @@ export class User {
   tel: string;
 
   @ApiProperty()
-  @IsDate()
+  @IsDateString()
   @IsOptional()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   @ApiProperty()
   @IsOptional()
+  @IsEnum(Role)
   @Column('text', { default: Role.Patient })
   role: Role;
 
