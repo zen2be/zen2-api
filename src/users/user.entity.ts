@@ -25,27 +25,27 @@ export enum Role {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  public id: number;
+  id: number;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
   @IsAlpha()
   @Column()
-  public firstName: string;
+  firstName: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
   @IsAlpha()
   @Column()
-  public lastName: string;
+  lastName: string;
 
   @ApiProperty()
   @IsEmail()
   @IsNotEmpty()
   @Column({ unique: true })
-  public email: string;
+  email: string;
 
   @BeforeInsert()
   async hashPassword(): Promise<void> {
