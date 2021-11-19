@@ -13,8 +13,9 @@ import {
   IsPhoneNumber,
   IsString,
   MinLength,
+  Validate,
 } from 'class-validator';
-import { Exclude } from 'class-transformer';
+import { PasswordIsNotCommonlyUsed } from './users.validator';
 
 export enum Role {
   Admin = 'admin',
@@ -59,6 +60,7 @@ export class User {
       'Password is too short (must have at least $constraint1 characters)',
   })
   @IsAscii()
+  @Validate(PasswordIsNotCommonlyUsed)
   @Column()
   password: string;
 

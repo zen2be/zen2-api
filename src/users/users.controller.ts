@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { BadRequestException, Controller } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Crud,
@@ -9,6 +9,7 @@ import {
   ParsedRequest,
 } from '@nestjsx/crud';
 import { Roles } from 'src/auth/roles.decorator';
+import { MailService } from 'src/mail/mail.service';
 import { Public } from 'src/public.decorator';
 import { Role, User } from './user.entity';
 import { UsersService } from './users.service';
@@ -21,7 +22,7 @@ import { UsersService } from './users.service';
 })
 @Controller('users')
 export class UsersController implements CrudController<User> {
-  constructor(public service: UsersService) {}
+  constructor(public service: UsersService, private mailService: MailService) {}
 
   get base(): CrudController<User> {
     return this;
@@ -29,8 +30,15 @@ export class UsersController implements CrudController<User> {
 
   @Public()
   @Override()
-  createOne(@ParsedRequest() req: CrudRequest, @ParsedBody() dto: User) {
-    return this.base.createOneBase(req, dto);
+  async createOne(@ParsedRequest() req: CrudRequest, @ParsedBody() dto: User) {
+    // create user in database
+    const user = await this.base.createOneBase(req, dto).catch((err) => {
+      throw new BadRequestException(err.message);
+    });
+    const token = await this.service.createVerificationToken(user.email);
+    // send verification mail
+    await this.mailService.sendUserConfirmation(user, token);
+    return user;
   }
 
   @Roles(Role.Admin)
