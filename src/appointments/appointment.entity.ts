@@ -43,20 +43,30 @@ export class Appointment {
   @Column()
   description: string;
 
-  @ApiProperty()
-  @OneToOne((type) => Treatment)
+  @ApiProperty({ type: () => Treatment })
+  @OneToOne(() => Treatment)
   @JoinColumn()
   treatment: Treatment;
 
-  @ApiProperty()
-  @ManyToOne((type) => User)
+  @ApiProperty({ type: () => User })
+  @ManyToOne(() => User, (user) => user.patientAppointments, {
+    onDelete: 'SET NULL',
+  })
   @Validate(IsPatient)
   patient: User;
 
-  @ApiProperty()
-  @ManyToOne((type) => User)
+  @ApiProperty({ type: () => User })
+  @ManyToOne(() => User, (user) => user.specialistAppointments, {
+    onDelete: 'SET NULL',
+  })
   @Validate(IsSpecialist)
   specialist: User;
+
+  @ApiProperty({ type: () => User })
+  @ManyToOne(() => User, (user) => user.scheduledByAppointments, {
+    onDelete: 'SET NULL',
+  })
+  scheduledBy: User;
 
   @ApiProperty()
   @IsBoolean()

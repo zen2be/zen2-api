@@ -18,6 +18,7 @@ import { PatientsService } from './patients.service';
         value: 'patient',
       },
     ],
+    exclude: ['password'],
   },
 })
 @Roles(Role.Admin, Role.Specialist)

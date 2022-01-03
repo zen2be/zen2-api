@@ -1,4 +1,6 @@
 import { BadRequestException, Controller } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Crud,
@@ -20,9 +22,15 @@ import { UsersService } from './users.service';
     type: User,
   },
 })
+@Roles(Role.Admin)
 @Controller('users')
 export class UsersController implements CrudController<User> {
-  constructor(public service: UsersService, private mailService: MailService) {}
+  constructor(
+    public service: UsersService,
+    private mailService: MailService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
   get base(): CrudController<User> {
     return this;
@@ -31,6 +39,16 @@ export class UsersController implements CrudController<User> {
   @Public()
   @Override()
   async createOne(@ParsedRequest() req: CrudRequest, @ParsedBody() dto: User) {
+    dto.refreshToken = await this.jwtService.signAsync(
+      {
+        email: dto.email,
+        sub: dto.id,
+      },
+      {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get('JWT_REFRESH_EXPIRY'),
+      },
+    );
     // create user in database
     const user = await this.base.createOneBase(req, dto).catch((err) => {
       throw new BadRequestException(err.message);
@@ -41,7 +59,6 @@ export class UsersController implements CrudController<User> {
     return user;
   }
 
-  @Roles(Role.Admin)
   @Override()
   getMany(@ParsedRequest() req: CrudRequest) {
     return this.base.getManyBase(req);

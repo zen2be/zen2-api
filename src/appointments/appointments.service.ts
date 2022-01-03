@@ -40,4 +40,27 @@ export class AppointmentsService extends TypeOrmCrudService<Appointment> {
       return 'not found';
     }
   }
+
+  async createAppointment(appointment: Appointment) {
+    if (appointment) {
+      const sd: Date = new Date(appointment.startDate);
+      const today = new Date(Date.now());
+      console.log(Math.abs(sd.getTime() - today.getTime()) / 3600000);
+      if (sd < today) {
+        return 'date less now';
+      } else {
+        if (appointment.startDate > appointment.endDate) {
+          return 'start > end';
+        } else {
+          if (Math.abs(sd.getTime() - today.getTime()) / 3600000 > 24) {
+            return 'create';
+          } else {
+            return 'date less 24';
+          }
+        }
+      }
+    } else {
+      return 'not found';
+    }
+  }
 }

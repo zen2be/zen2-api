@@ -26,14 +26,83 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = {
-      email: user.email,
-      sub: user.id,
-      roles: user.role,
-      verified: user.verified,
-    };
+    const [at, rt] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          email: user.email,
+          sub: user.id,
+          roles: user.role,
+          verified: user.verified,
+        },
+        {
+          secret: this.configService.get('JWT_PASSWORD_SECRET'),
+          expiresIn: this.configService.get('JWT_PASSWORD_EXPIRY'),
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          email: user.email,
+          sub: user.id,
+        },
+        {
+          secret: this.configService.get('JWT_REFRESH_SECRET'),
+          expiresIn: this.configService.get('JWT_REFRESH_EXPIRY'),
+        },
+      ),
+    ]);
+
+    const hash = await bcrypt.hash(
+      rt,
+      this.configService.get('JWT_REFRESH_SALT_ROUNDS'),
+    );
+
+    this.usersService.updateRefreshToken(user.id, hash);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: at,
+      refresh_token: rt,
+    };
+  }
+
+  async refreshTokens(accessToken: string) {
+    const email = await this.verifyAccessToken(accessToken);
+    const user = await this.usersService.findByEmail(email);
+
+    const [at, rt] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          email: user.email,
+          sub: user.id,
+          roles: user.role,
+          verified: user.verified,
+        },
+        {
+          secret: this.configService.get('JWT_PASSWORD_SECRET'),
+          expiresIn: this.configService.get('JWT_PASSWORD_EXPIRY'),
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          email: user.email,
+          sub: user.id,
+        },
+        {
+          secret: this.configService.get('JWT_REFRESH_SECRET'),
+          expiresIn: this.configService.get('JWT_REFRESH_EXPIRY'),
+        },
+      ),
+    ]);
+
+    const hash = await bcrypt.hash(
+      rt,
+      this.configService.get('JWT_REFRESH_SALT_ROUNDS'),
+    );
+
+    this.usersService.updateRefreshToken(user.id, hash);
+
+    return {
+      access_token: at,
+      refresh_token: rt,
     };
   }
 
@@ -70,5 +139,38 @@ export class AuthService {
     }
     const token = await this.usersService.createVerificationToken(user.email);
     await this.mailService.sendUserConfirmation(user, token);
+  }
+
+  async verifyAccessToken(token: string) {
+    try {
+      const payload = await this.jwtService.verify(token, {
+        secret: this.configService.get('JWT_PASSWORD_SECRET'),
+      });
+
+      if (typeof payload === 'object' && 'email' in payload) {
+        return payload.email;
+      }
+      throw new BadRequestException();
+    } catch (error) {
+      if (error?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Email confirmation token expired');
+      }
+      throw new BadRequestException('Bad confirmation token');
+    }
+  }
+
+  async decodeRefreshToken(refreshToken: string) {
+    try {
+      const payload = await this.jwtService.verify(refreshToken, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+      });
+
+      if (typeof payload === 'object' && 'id' in payload) {
+        return payload.id;
+      }
+      throw new BadRequestException();
+    } catch (error) {
+      throw new BadRequestException('Bad refresh token');
+    }
   }
 }

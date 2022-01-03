@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BeforeInsert,
+  OneToMany,
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ApiProperty } from '@nestjs/swagger';
 import {
@@ -8,6 +14,7 @@ import {
   IsDateString,
   IsEmail,
   IsEnum,
+  IsJWT,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
@@ -16,6 +23,8 @@ import {
   Validate,
 } from 'class-validator';
 import { PasswordIsNotCommonlyUsed } from './users.validator';
+import { Appointment } from 'src/appointments/appointment.entity';
+import { Treatment } from 'src/treatments/treatment.entity';
 
 export enum Role {
   Admin = 'admin',
@@ -76,7 +85,7 @@ export class User {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @ApiProperty()
+  @ApiProperty({ enum: () => Role })
   @IsOptional()
   @IsEnum(Role)
   @Column('text', { default: Role.Patient })
@@ -87,4 +96,33 @@ export class User {
   @IsOptional()
   @Column({ default: false })
   verified: boolean;
+
+  @BeforeInsert()
+  async hashRefreshToken(): Promise<void> {
+    const saltOrRounds = 10;
+    this.refreshToken = await bcrypt.hash(this.refreshToken, saltOrRounds);
+  }
+  @ApiProperty()
+  @Column()
+  refreshToken: string;
+
+  @OneToMany(() => Appointment, (appointment) => appointment.patient, {
+    onDelete: 'SET NULL',
+  })
+  patientAppointments: Appointment[];
+
+  @OneToMany(() => Appointment, (appointment) => appointment.specialist, {
+    onDelete: 'SET NULL',
+  })
+  specialistAppointments: Appointment[];
+
+  @OneToMany(() => Appointment, (appointment) => appointment.scheduledBy, {
+    onDelete: 'SET NULL',
+  })
+  scheduledByAppointments: Appointment[];
+
+  @OneToMany(() => Treatment, (treatment) => treatment.specialist, {
+    onDelete: 'SET NULL',
+  })
+  treatments: Treatment[];
 }

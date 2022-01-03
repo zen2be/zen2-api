@@ -15,16 +15,7 @@ import { JwtModule } from '@nestjs/jwt';
     TypeOrmModule.forFeature([User]),
     MailModule,
     HttpModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_VERIFICATION_SECRET'),
-        signOptions: {
-          expiresIn: configService.get('JWT_VERIFICATION_EXPIRY'),
-        },
-      }),
-    }),
+    JwtModule.register({}),
   ],
   providers: [PasswordIsNotCommonlyUsed, UsersService],
   controllers: [UsersController],

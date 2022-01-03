@@ -17,7 +17,7 @@ import { join } from 'path';
         database: configService.get('DB_NAME'),
         entities: [join(__dirname, '**', '*.entity.{ts,js}')],
         synchronize:
-          configService.get('APP_ENV') === 'production' ? true : false, //should be false at production!
+          configService.get('APP_ENV') === 'production' ? false : true, //should be false at production!
       }),
     }),
   ],

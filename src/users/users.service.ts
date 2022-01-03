@@ -1,5 +1,5 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
@@ -9,7 +9,7 @@ import { User } from './user.entity';
 export class UsersService extends TypeOrmCrudService<User> {
   constructor(
     @InjectRepository(User) repo,
-    private http: HttpService,
+    private configService: ConfigService,
     private jwtService: JwtService,
   ) {
     super(repo);
@@ -33,7 +33,14 @@ export class UsersService extends TypeOrmCrudService<User> {
 
   async createVerificationToken(email: string): Promise<string> {
     const payload = { email };
-    const token = this.jwtService.sign(payload);
+    const token = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_VERIFICATION_SECRET'),
+      expiresIn: this.configService.get('JWT_VERIFICATION_EXPIRY'),
+    });
     return token;
+  }
+
+  async updateRefreshToken(id: number, refreshToken: string): Promise<any> {
+    await this.repo.update({ id }, { refreshToken });
   }
 }
