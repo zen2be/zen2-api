@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { AtStrategy } from './strategies/at.strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { LocalStrategy } from './strategies/local.strategy';
 import { MailModule } from 'src/mail/mail.module';
 
@@ -20,5 +20,6 @@ import { MailModule } from 'src/mail/mail.module';
   ],
   providers: [AuthService, LocalStrategy, AtStrategy, RtStrategy],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}

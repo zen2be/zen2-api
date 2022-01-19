@@ -4,6 +4,7 @@ import {
   Column,
   BeforeInsert,
   OneToMany,
+  BeforeUpdate,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ApiProperty } from '@nestjs/swagger';
@@ -24,6 +25,7 @@ import {
 import { PasswordIsNotCommonlyUsed } from './users.validator';
 import { Appointment } from 'src/appointments/appointment.entity';
 import { Treatment } from 'src/treatments/treatment.entity';
+import { Timeslot } from 'src/timeslots/timeslot.entity';
 
 export enum Role {
   Admin = 'admin',
@@ -57,6 +59,7 @@ export class User {
   email: string;
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword(): Promise<void> {
     const saltOrRounds = 12;
     this.password = await bcrypt.hash(this.password, saltOrRounds);
@@ -97,6 +100,7 @@ export class User {
   verified: boolean;
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashRefreshToken(): Promise<void> {
     const saltOrRounds = 10;
     this.refreshToken = await bcrypt.hash(this.refreshToken, saltOrRounds);
@@ -124,4 +128,9 @@ export class User {
     onDelete: 'SET NULL',
   })
   treatments: Treatment[];
+
+  @OneToMany(() => Timeslot, (timeslot) => timeslot.specialist, {
+    onDelete: 'SET NULL',
+  })
+  timeslots: Timeslot[];
 }

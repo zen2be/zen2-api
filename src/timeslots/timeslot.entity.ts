@@ -2,7 +2,13 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsMilitaryTime, Validate } from 'class-validator';
 import { User } from 'src/users/user.entity';
 import { IsSpecialist } from 'src/users/users.validator';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  RelationId,
+} from 'typeorm';
 
 enum Day {
   Monday = 'monday',
@@ -34,8 +40,8 @@ export class Timeslot {
   @Column()
   endTime: string;
 
-  @ApiProperty()
-  @ManyToOne((type) => User)
+  @ApiProperty({ type: () => User })
+  @ManyToOne(() => User, (user) => user.timeslots, { onDelete: 'SET NULL' })
   @Validate(IsSpecialist)
   specialist: User;
 }
