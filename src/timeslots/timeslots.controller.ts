@@ -33,8 +33,24 @@ export class TimeslotsController implements CrudController<Timeslot> {
     @ParsedRequest() req: CrudRequest,
     @ParsedBody() dto: Timeslot,
   ) {
-    if (dto.startTime > dto.endTime) {
+    if (dto.startTime > dto.endTime || dto.startTime == dto.endTime) {
       throw new BadRequestException('StartTime must be less than endTime');
+    }
+    const existingTimeslots = await this.service.find({
+      where: {
+        specialist: dto.specialist,
+      },
+    });
+
+    for (const timeslot of existingTimeslots) {
+      if (
+        dto.startTime > timeslot.startTime &&
+        dto.startTime < timeslot.endTime
+      ) {
+        throw new BadRequestException(
+          `Timeslots can't overlap, choose another time`,
+        );
+      }
     }
     return await this.base.createOneBase(req, dto);
   }

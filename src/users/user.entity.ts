@@ -14,7 +14,6 @@ import {
   IsDateString,
   IsEmail,
   IsEnum,
-  IsJWT,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
