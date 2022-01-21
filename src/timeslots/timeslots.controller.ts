@@ -1,4 +1,10 @@
-import { BadRequestException, Controller, Headers } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Headers,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Crud,
@@ -85,26 +91,39 @@ export class TimeslotsController implements CrudController<Timeslot> {
   async updateOne(
     @ParsedRequest() req: CrudRequest,
     @ParsedBody() dto: Timeslot,
+    @Headers() headers,
+    @Param('id', new ParseIntPipe()) id,
   ) {
+    const authHeader = headers.authorization;
+    const token = authHeader.replace('Bearer ', '');
+    const email = await this.authService.verifyAccessToken(token);
+    const user = await this.usersService.findByEmail(email);
     if (dto.startTime > dto.endTime || dto.startTime == dto.endTime) {
       throw new BadRequestException('StartTime must be less than endTime');
     }
+    const selTimeslot = await this.service.findOne({ id: id });
     const existingTimeslots = await this.service.find({
       where: {
-        specialist: dto.specialist,
+        specialist: user,
+        day: selTimeslot.day,
       },
     });
 
     for (const timeslot of existingTimeslots) {
+      if (timeslot.id === id) {
+        continue;
+      }
       if (
-        dto.startTime > timeslot.startTime &&
-        dto.startTime < timeslot.endTime
+        (dto.startTime < timeslot.endTime &&
+          dto.startTime > timeslot.startTime) ||
+        (dto.endTime < timeslot.endTime && dto.endTime > timeslot.startTime)
       ) {
         throw new BadRequestException(
           `Timeslots can't overlap, choose another time`,
         );
       }
+
+      return await this.base.updateOneBase(req, dto);
     }
-    return await this.base.updateOneBase(req, dto);
   }
 }

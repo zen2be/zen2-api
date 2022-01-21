@@ -1,14 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsMilitaryTime, Validate } from 'class-validator';
+import { CrudValidationGroups } from '@nestjsx/crud';
+import { IsEnum, IsMilitaryTime, IsOptional, Validate } from 'class-validator';
 import { User } from 'src/users/user.entity';
 import { IsSpecialist } from 'src/users/users.validator';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  RelationId,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+const { UPDATE } = CrudValidationGroups;
 
 enum Day {
   Monday = 'monday',
@@ -28,6 +24,7 @@ export class Timeslot {
   @ApiProperty()
   @IsEnum(Day)
   @Column('text')
+  @IsOptional({ groups: [UPDATE] })
   day: Day;
 
   @ApiProperty()
@@ -43,5 +40,6 @@ export class Timeslot {
   @ApiProperty({ type: () => User })
   @ManyToOne(() => User, (user) => user.timeslots, { onDelete: 'SET NULL' })
   @Validate(IsSpecialist)
+  @IsOptional({ groups: [UPDATE] })
   specialist: User;
 }

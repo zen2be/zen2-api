@@ -49,7 +49,7 @@ export class AppointmentsService extends TypeOrmCrudService<Appointment> {
       if (sd < today) {
         return 'date less now';
       } else {
-        if (appointment.startDate > appointment.endDate) {
+        if (appointment.startDate >= appointment.endDate) {
           return 'start > end';
         } else {
           if (Math.abs(sd.getTime() - today.getTime()) / 3600000 > 24) {

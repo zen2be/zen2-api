@@ -42,6 +42,8 @@ export class Treatment {
   @Column()
   price: number;
 
-  @OneToMany(() => Appointment, (appointment) => appointment.treatment)
-  appointment: Appointment;
+  @OneToMany(() => Appointment, (appointment) => appointment.treatment, {
+    onDelete: 'SET NULL',
+  })
+  appointments: Appointment[];
 }

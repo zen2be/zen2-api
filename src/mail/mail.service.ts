@@ -48,4 +48,25 @@ export class MailService {
       },
     });
   }
+
+  async sendCreatedAppointmentToReceiver(
+    asker: User,
+    receiver: User,
+    appointment: Appointment,
+  ) {
+    console.log(receiver);
+
+    await this.mailerService.sendMail({
+      to: receiver.email,
+      from: `"Zen2" <${this.configService.get('MAIL_FROM')}>`, // override default from
+      subject: `Appointment created`,
+      template: './appointment-created-receiver', // `.hbs` extension is appended automatically
+      context: {
+        // ✏️ filling curly brackets with content
+        asker,
+        appointment,
+        receiver,
+      },
+    });
+  }
 }

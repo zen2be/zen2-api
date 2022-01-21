@@ -44,8 +44,9 @@ export class Appointment {
   description: string;
 
   @ApiProperty({ type: () => Treatment })
-  @OneToOne(() => Treatment)
-  @JoinColumn()
+  @ManyToOne(() => Treatment, (treatment) => treatment.appointments, {
+    onDelete: 'SET NULL',
+  })
   treatment: Treatment;
 
   @ApiProperty({ type: () => User })

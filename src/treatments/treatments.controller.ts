@@ -20,6 +20,14 @@ import { TreatmentsService } from './treatments.service';
   model: {
     type: Treatment,
   },
+  query: {
+    join: {
+      specialist: {
+        eager: true,
+        exclude: ['password', 'verified', 'createdAt'],
+      },
+    },
+  },
 })
 @Controller('treatments')
 @Roles(Role.Specialist)

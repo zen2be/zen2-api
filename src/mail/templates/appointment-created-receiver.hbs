@@ -1,9 +1,12 @@
-<p>Hey {{receiver.firstName}},</p>
+<p>Hi {{receiver.firstName}},</p>
 <p>{{asker.lastName}}
   {{asker.firstName}}
   scheduled an appointment for
-  {{startDate}}
+  {{appointment.startDate}}
   -
-  {{endDate}}</p>
+  {{appointment.endDate}}</p>
 
 <p>Please cancel or confirm the appointment accordingly.</p>
+
+<a href='{{confirm-url}}'>Confirm</a>
+<a href='{{cancel-url}}'>Cancel</a>

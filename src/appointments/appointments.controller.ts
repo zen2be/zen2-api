@@ -98,6 +98,8 @@ export class AppointmentsController implements CrudController<Appointment> {
     let receiver: User;
     if (appointment.scheduledBy === appointment.patient) {
       receiver = appointment.specialist;
+    } else {
+      receiver = appointment.patient;
     }
     this.mailService.sendCreatedAppointmentToAsker(
       asker,
